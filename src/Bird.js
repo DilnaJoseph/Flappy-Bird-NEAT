@@ -21,6 +21,8 @@ export class Bird {
         // NOTE: Paths are relative to index.html when served by the browser
         this.image.src = imagePath; 
 
+        this.dead = false;
+
         this.setupInputListeners(); // Set up the event listeners
     }
 
@@ -53,7 +55,7 @@ export class Bird {
     triggerFlapAction() {
         // Only allow flapping when the game is actively playing
         if (this.getCurrentState() === this.gameState.start) {
-            this.velocity = -3.8; // Strong, immediate jump velocity
+            this.velocity = -(window.gameConfig.jumpPower); // Strong, immediate jump velocity
         }
     }
 
@@ -90,7 +92,7 @@ export class Bird {
         
         // Simple gravity: if not the max terminal velocity (2), accelerate towards it
         if (this.velocity < 6) { // Setting a max terminal velocity of 10 for realism
-             this.velocity += 0.125;
+             this.velocity += window.gameConfig.gravity;
         }
         
         // Smooth rotation: flap up tilts -25 degrees, falling tilts +90 degrees

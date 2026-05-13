@@ -8,8 +8,126 @@
     <link rel="stylesheet" href="style/main.css">
     <link rel="icon" type="image/png" href="./assets/images/pngegg.png">
 </head>
-<body>
-    <canvas id="canvas" width="325" height="512"></canvas>
+<body onload="brython()">
+    <!-- Main Menu Overlay -->
+    <div id="main-menu">
+        <div class="menu-content">
+            <h1>FLAPPY<br>ADVENTURE</h1>
+            
+            <div class="button-group">
+                <button class="menu-btn" onclick="startGame('manual')">
+                    Play Game
+                </button>
+                <br>
+                <button class="menu-btn ai" onclick="startGame('ai')">
+                    AI Training
+                </button>
+            </div>
+        </div>
+        
+        <div class="menu-footer">
+            © 2026 NEAT-EVOLUTION SYSTEM v1.0
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container" style="display: none;">
+        <div class="split-wrapper">
+            <!-- Left Side: The Game -->
+            <div id="canvas-area">
+                <canvas id="canvas" width="325" height="512"></canvas>
+                <div id="pause-overlay" style="display: none;">
+                    <p>PAUSED</p>
+                    <span>Click game to resume</span>
+                </div>
+            </div>
+
+            <!-- Right Side: The Config Panel -->
+            <div id="config-panel">
+                <h3>SETTINGS</h3>
+                
+                <div class="control-group">
+                    <label>Game Speed</label>
+                    <input type="range" id="speed-slider" min="1" max="5" step="1" value="1">
+                    <span id="speed-val">1x</span>
+                </div>
+
+                <div class="control-group">
+                    <label>Pipe Gap</label>
+                    <input type="range" id="gap-slider" min="80" max="200" step="10" value="120">
+                    <span id="gap-val">120</span>
+                </div>
+
+                <div class="control-group">
+                    <label>Pipe Frequency</label>
+                    <input type="range" id="freq-slider" min="50" max="300" step="10" value="200">
+                    <span id="freq-val">200</span>
+                </div>
+
+                <!-- Physics Group -->
+                <div class="control-group">
+                    <label>Gravity</label>
+                    <input type="range" id="gravity-slider" min="0.05" max="0.3" step="0.01" value="0.125">
+                    <span id="gravity-val">0.12</span>
+                </div>
+
+                <div class="control-group">
+                    <label>Jump Power</label>
+                    <input type="range" id="jump-slider" min="2" max="6" step="0.2" value="3.8">
+                    <span id="jump-val">3.8</span>
+                </div>
+
+                <!-- Debug Group -->
+                <div class="control-group">
+                    <label style="color: #00ff00;">DEBUG MODE</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="hitbox-toggle">
+                        <span style="font-size: 8px;">Show Hitboxes</span>
+                    </div>
+                </div>
+
+                <!-- AI Stats Group (Only shown in AI mode) -->
+                <div id="ai-stats" style="display: none; border-top: 2px solid #444; padding-top:20px; margin-top: 20px;">
+                    <h3 style="color: #00ff00;">AI TRAINING</h3>
+                    <p style="font-size: 10px;">Gen: <span id="gen-val">1</span></p>
+                    <p style="font-size: 10px;">Alive: <span id="alive-val">0</span>/50</p>
+                    <p style="font-size: 10px;">Best: <span id="best-val">0</span></p>
+                    
+                    <div class="control-group">
+                        <label>Training Speed</label>
+                        <input type="range" id="ai-speed-slider" min="1" max="10" step="1" value="1">
+                        <span id="ai-speed-val">1x</span>
+                    </div>
+                </div>
+
+                <button class="menu-btn small" onclick="showMenu()">BACK TO MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mainMenu = document.getElementById('main-menu');
+        const gameContainer = document.getElementById('game-container');
+
+        function startGame(mode) {
+            mainMenu.style.display = 'none';
+            gameContainer.style.display = 'block';
+            
+            // Set AI mode in our bridge
+            window.aiBridge.isAiEnabled = (mode === 'ai');
+            
+            // Re-trigger game start if necessary (handled in Game.js)
+            window.dispatchEvent(new CustomEvent('gameStart', { detail: { mode: mode } }));
+        }
+
+        function showMenu() {
+            mainMenu.style.display = 'flex';
+            gameContainer.style.display = 'none';
+            location.reload(); // Simplest way to reset the JS/Python state for now
+        }
+    </script>
+
+    <script type="text/python" src="src/brain.py"></script>
     <script type="module" src="src/Game.js"></script>
 </body>
 </html>

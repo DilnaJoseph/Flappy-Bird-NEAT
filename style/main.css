@@ -27,3 +27,140 @@ canvas {
     width: 100%;
     height: 100%;
 }
+
+#main-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Press Start 2P', cursive;
+    color: white;
+    /* Animated background */
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('../assets/images/flappy-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    text-align: center;
+}
+
+/* Floating Animation for the Title */
+h1 {
+    font-size: 42px;
+    margin-bottom: 60px;
+    color: #fff;
+    text-shadow: 6px 6px #e86101, 10px 10px #533847;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Massive Retro Buttons */
+.menu-btn {
+    position: relative;
+    background-color: #54c0c9; /* Flappy Sky Blue */
+    border: 6px solid #fff;
+    padding: 25px 50px;
+    margin: 20px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 18px;
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    /* 3D block shadow effect */
+    box-shadow: 0 10px 0 #2d828a, 0 15px 20px rgba(0,0,0,0.5);
+    transition: all 0.1s ease;
+}
+
+.menu-btn:hover {
+    background-color: #6edce6;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 0 #2d828a, 0 18px 25px rgba(0,0,0,0.5);
+}
+
+.menu-btn:active {
+    transform: translateY(8px);
+    box-shadow: 0 2px 0 #2d828a;
+}
+
+/* Secondary button color for AI */
+.menu-btn.ai {
+    background-color: #f7951e;
+    box-shadow: 0 10px 0 #a35d00, 0 15px 20px rgba(0,0,0,0.5);
+}
+
+.menu-btn.ai:hover {
+    background-color: #ffaa42;
+    box-shadow: 0 12px 0 #a35d00;
+}
+
+/* Decorative Footer */
+.menu-footer {
+    position: absolute;
+    bottom: 20px;
+    font-size: 10px;
+    color: #ccc;
+    letter-spacing: 2px;
+}
+
+.split-wrapper {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    width: 100vw;
+    background-color: #222;
+}
+
+#canvas-area {
+    flex: 2; /* Takes up more space */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #383838;
+}
+
+#config-panel {
+    flex: 1; /* Sidebar width */
+    background-color: #1a1a1a;
+    border-left: 4px solid #444;
+    padding: 20px;
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+#config-panel h3 { font-size: 18px; color: #f7951e; margin-bottom: 10px; }
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-group label { font-size: 10px; color: #aaa; }
+
+#pause-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    pointer-events: none; /* Let clicks pass through if needed */
+}
+
+#pause-overlay p { font-size: 30px; color: white; margin-bottom: 10px; }
+#pause-overlay span { font-size: 10px; color: #f7951e; }
+
+.menu-btn.small {
+    font-size: 10px;
+    padding: 15px;
+    margin-top: auto; /* Push to bottom */
+}

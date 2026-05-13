@@ -1,11 +1,27 @@
 // src/Pipes.js
 
 // 1. Pipe Constants: Define properties that won't change during the game
-export const pipeWidth = 52;  
-export const pipeGap = 120;   
-export const pipeSpeed = 1;
+export let pipeWidth = 52;  
+export let pipeGap = 120;   
+export let pipeSpeed = 1;
+export let pipeFrequency = 200;
+
+// Add these functions
+export const setPipeGap = (val) => pipeGap = val;
+export const setPipeSpeed = (val) => pipeSpeed = val;
+export const setPipeFrequency = (val) => pipeFrequency = val;
 
 const pipeTileHeight = 50;
+
+// const scoreSound = new Audio('assets/sounds/score.mp3');
+// scoreSound.load();
+
+// export function playScoreSound() {
+//     // Resetting time ensures the sound can be played rapidly without waiting 
+//     // for the previous instance to finish.
+//     scoreSound.currentTime = 0; 
+//     scoreSound.play();
+// }
 
 // Load the pipe images
 const pipeTopImage = new Image();
@@ -87,12 +103,13 @@ export function updatePipes(ctx, canvasWidth, canvasHeight, bird) {
         if (pipe.x + pipeWidth < bird.x - bird.width/2 && pipe.passed === false) {
             score++;
             pipe.passed = true;
+            // playScoreSound();
             // Ideally, here you'd play a score sound!
         }
     }
     
     frameCount++;
-    if (frameCount % 200 === 0) { 
+    if (frameCount % pipeFrequency === 0) { 
         // Define the safe vertical limits for the GAP'S CENTER POINT.
         // We need to ensure the entire gap (pipeGap) plus some pipe is visible
         const minCenterY = 50 + (pipeGap / 2); 
