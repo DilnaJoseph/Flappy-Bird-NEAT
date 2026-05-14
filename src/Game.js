@@ -1,5 +1,14 @@
 // src/Game.js
 
+// TOP OF Game.js
+window.aiBridge = {
+    isAiEnabled: false,
+    decide: () => false,
+    getGen: () => 1,
+    getAlive: () => 0,
+    nextGen: () => {}
+};
+
 // ---------------- IMPORTS ----------------
 import { Bird } from './Bird.js';
 import { updatePipes, getScore, pipeWidth, pipeGap, getPipes, resetScore, resetPipes, drawPipe} from './Pipes.js';
@@ -16,21 +25,45 @@ const configPanel = document.getElementById('config-panel');
 
 let isPaused = false;
 
+let isTraining = false;
+
+function toggleSettings(lock) {
+    isTraining = lock;
+    const sliders = document.querySelectorAll('#config-panel input');
+    const startBtn = document.getElementById('ai-start-btn');
+    const stopBtn = document.getElementById('ai-stop-btn');
+
+    sliders.forEach(slider => {
+        slider.disabled = lock; // This makes them immovable
+    });
+
+    if (lock) {
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'block';
+    } else {
+        startBtn.style.display = 'block';
+        stopBtn.style.display = 'none';
+    }
+}
+
+// Button Listeners
+document.getElementById('ai-start-btn').addEventListener('click', () => {
+    toggleSettings(true);
+    currentState = gameState.start; // Trigger the game loop
+});
+
+document.getElementById('ai-stop-btn').addEventListener('click', () => {
+    toggleSettings(false);
+    currentState = gameState.ready; // Pause/Reset the simulation
+});
+
 window.gameConfig = {
     gravity: 0.125,
     jumpPower: 3.8,
     showHitboxes: false
 };
 
-// Update via sliders
-document.getElementById('gravity-slider').addEventListener('input', (e) => {
-    window.gameConfig.gravity = parseFloat(e.target.value);
-    document.getElementById('gravity-val').innerText = e.target.value;
-});
-
-document.getElementById('hitbox-toggle').addEventListener('change', (e) => {
-    window.gameConfig.showHitboxes = e.target.checked;
-});
+// Stop the game from reacting when interacting with setting
 
 // --- Pause Logic ---
 document.getElementById('config-panel').addEventListener('mousedown', () => {
@@ -41,36 +74,6 @@ document.getElementById('config-panel').addEventListener('mousedown', () => {
 canvas.addEventListener('mousedown', () => {
     isPaused = false;
     pauseOverlay.style.display = 'none';
-});
-
-// --- Slider Listeners ---
-document.getElementById('speed-slider').addEventListener('input', (e) => {
-    const val = parseInt(e.target.value);
-    document.getElementById('speed-val').innerText = val + 'x';
-    setPipeSpeed(val); 
-});
-
-document.getElementById('gap-slider').addEventListener('input', (e) => {
-    const val = parseInt(e.target.value);
-    document.getElementById('gap-val').innerText = val;
-    setPipeGap(val);
-});
-
-document.getElementById('freq-slider').addEventListener('input', (e) => {
-    const val = parseInt(e.target.value);
-    document.getElementById('freq-val').innerText = val;
-    setPipeFrequency(val);
-});
-
-window.addEventListener('gameStart', (e) => {
-    const mode = e.detail.mode;
-    if (mode === 'ai') {
-        console.log("AI Mode Activated");
-        // We can speed up the game here later for faster training
-    } else {
-        console.log("Manual Mode Activated");
-    }
-    currentState = gameState.ready;
 });
 
 // ---------------- GAME STATES ----------------
@@ -107,17 +110,65 @@ const backgroundImage = new Image();
 backgroundImage.src = 'assets/images/flappy-bg.jpg';
 
 // Instantiate the Bird object
-const bird = new Bird(
-    100, // x
-    canvas.height / 2, // y (start in center)
-    10, // radius
-    '#FF0000', // color
-    40, // width
-    30, // height
-    () => currentState, // function to dynamically get current state
-    gameState, // game state
-    'assets/images/flappy-bird.png' // imagePath
-);
+let birds = [];
+const POP_SIZE = 50;
+
+birds.push(new Bird(
+    100, canvas.height / 2, 10, '#FF0000', 40, 30, 
+    () => currentState, gameState, 'assets/images/flappy-bird.png'
+));
+
+window.addEventListener('gameStart', (e) => {
+    const mode = e.detail.mode;
+
+    // --- Slider Listeners ---
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('speed-val').innerText = val + 'x';
+        setPipeSpeed(val); 
+    });
+
+    document.getElementById('gap-slider').addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('gap-val').innerText = val;
+        setPipeGap(val);
+    });
+
+    document.getElementById('freq-slider').addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        document.getElementById('freq-val').innerText = val;
+        setPipeFrequency(val);
+    });
+
+    document.getElementById('hitbox-toggle').addEventListener('change', (e) => {
+        window.gameConfig.showHitboxes = e.target.checked;
+    });
+
+    console.log(`${mode.toUpperCase()} Mode Activated`);
+
+    // 1. Configure AI Bridge
+    window.aiBridge.isAiEnabled = (mode === 'ai');
+    
+    // 2. UI Updates
+    const aiStats = document.getElementById('ai-stats');
+    if (aiStats) aiStats.style.display = (mode === 'ai') ? 'block' : 'none';
+
+    // 3. Population Management
+    birds = []; // Clear existing birds
+    const count = (mode === 'ai') ? POP_SIZE : 1;
+    
+    for (let i = 0; i < count; i++) {
+        birds.push(new Bird(
+            100, canvas.height / 2, 10, '#FF0000', 40, 30, 
+            () => currentState, gameState, 'assets/images/flappy-bird.png'
+        ));
+    }
+
+    // 4. Start the Game
+    // We set it to 'ready' first to show the "Tap to Flap", 
+    // or set it to 'start' to jump straight into action.
+    currentState = gameState.ready; 
+});
 
 // ---------------- INPUT HANDLING ----------------
 window.addEventListener('keydown',(e)=>{
@@ -129,9 +180,13 @@ window.addEventListener('keydown',(e)=>{
         // if play --> play(no change)
         // if game over --> restart game
         else if(currentState === gameState.game_over){
-             bird.y = canvas.height/2;
-             bird.velocity = 2;
-            bird.rotation = 0;
+            birds[0].y = canvas.height/2;
+            birds[0].velocity = 2;
+            birds[0].rotation = 0;
+            birds[0].dead = false;
+
+            resetPipes(); 
+            resetScore();
 
             isRestarting = true;
             currentState = gameState.ready;
@@ -153,14 +208,16 @@ canvas.addEventListener('touchstart', (e) => {
     
     // 2. If playing, flap the bird
     else if (currentState === gameState.start) {
-        bird.triggerFlapAction();
+        if (!window.aiBridge.isAiEnabled) {
+            birds[0].triggerFlapAction();
+        }
     }
     
     // 3. If game over, restart the game (Tapping to restart is intuitive on mobile)
     else if (currentState === gameState.game_over) {
-        bird.y = canvas.height / 2;
-        bird.velocity = 2;
-        bird.rotation = 0;
+        birds[0].y = canvas.height / 2;
+        birds[0].velocity = 2;
+        birds[0].rotation = 0;
 
         isRestarting = true;
         currentState = gameState.ready;
@@ -335,10 +392,10 @@ function drawHitboxes(ctx, bird) {
 
     // Bird Hitbox
     ctx.strokeRect(
-        bird.x - bird.width / 2, 
-        bird.y - bird.height / 2, 
-        bird.width, 
-        bird.height
+        birds[0].x - birds[0].width / 2, 
+        birds[0].y - birds[0].height / 2, 
+        birds[0].width, 
+        birds[0].height
     );
 
     // Pipes Hitbox
@@ -372,56 +429,86 @@ function gameloop() {
                     resetPipes();
                     isRestarting = false; // Reset the flag
                     hasNewHighScore = false;
+                    birds[0].dead = false;
                 }
-                bird.draw(ctx);
-                drawStartScreen(bird);
+                if (birds.length > 0) {
+                    birds[0].draw(ctx);
+                    drawStartScreen(birds[0]); // Just show the first bird as a preview
+                }
                 break;
                 
             case gameState.start:
-                // currently playing
-                bird.update();
+                let allDead = true;
+                const pipes = getPipes();
+                
+                // Use the first bird to find the next pipe (since they all see the same pipes)
+                const nextPipe = pipes.find(p => p.x + pipeWidth > birds[0].x - birds[0].width/2);
 
-                // Update pipes and draw them
-                updatePipes(ctx, canvas.width, canvas.height, bird);
+                birds.forEach((b, index) => {
+                    if (b.dead) return; // Skip dead birds
+                    allDead = false;
 
-                // Check collision between bird and pipes/ground
-                if (isColliding(bird, getPipes(), canvas.height)) {
-                    // crashSound.play();
-                    const finalScore = getScore();
-                    const oldHighScore = Number(highScore);
-                    
-                    if (finalScore > oldHighScore) {
-                        highScore = finalScore;
-                        localStorage.setItem('flappyHighScore', highScore);
-                        hasNewHighScore = true; // <-- Cache the status!
-                    } else {
-                        hasNewHighScore = false; // Important: Clear the status if not a new score
+                    // 1. AI Decision Making
+                    if (window.aiBridge.isAiEnabled && nextPipe) {
+                        const data = { 
+                            birdY: b.y, 
+                            distToPipe: nextPipe.x - b.x, 
+                            pipeCenter: nextPipe.center, 
+                            velocity: b.velocity 
+                        };
+                        // Python decide() now takes the 'index' to know which bird it's helping
+                        if (window.aiBridge.decide(data, index)) {
+                            b.triggerFlapAction();
+                        }
                     }
 
+                    // 2. Physics and Collision
+                    b.update();
+                    if (isColliding(b, pipes, canvas.height)) {
+                        b.dead = true; 
+                    }
+
+                    // 3. Drawing
+                    b.draw(ctx);
+                    drawHitboxes(ctx, b);
+                });
+
+                // 4. World Update (Move pipes)
+                updatePipes(ctx, canvas.width, canvas.height, birds[0]);
+                drawScore();
+
+                // 5. AI Management (Check if everyone is dead)
+                if (window.aiBridge.isAiEnabled) {
+                    document.getElementById('gen-val').innerText = window.aiBridge.getGen();
+                    document.getElementById('alive-val').innerText = window.aiBridge.getAlive();
+                    
+                    if (allDead) {
+                        window.aiBridge.nextGen(); // Tell Python to evolve
+                        resetPipes();
+                        // Reset birds for next generation
+                        birds.forEach(b => { 
+                            b.dead = false; 
+                            b.y = canvas.height/2; 
+                            b.velocity = 0; 
+                        });
+                    }
+                } else if (allDead) {
+                    // Manual mode behavior
                     currentState = gameState.game_over;
                 }
-
-                bird.draw(ctx);
-                drawScore();
-                drawHitboxes(ctx, bird);
                 break;
 
             case gameState.game_over:
-                // 1. Draw the static pipes where they were at the moment of impact
-                const finalPipes = getPipes();
-                finalPipes.forEach(pipe => {
-                    // We use the drawPipe function exported from Pipes.js
-                    drawPipe(ctx, pipe, canvas.height);
-                });
+                const deadBird = birds[0];
                 getPipes().forEach(pipe => drawPipe(ctx, pipe, canvas.height));
 
                 // Make bird fall until it hits the floor
-                if (bird.y + bird.height / 2 < canvas.height) {
-                    bird.update();
+                if (deadBird.y + deadBird.height / 2 < canvas.height) {
+                    deadBird.update();
                 }
 
                 // 2. Draw the bird (it might still be falling or rotating)
-                bird.draw(ctx);
+                deadBird.draw(ctx);
                 
                 // 3. Handle the UI animations
                 if (gameOverScreenXOffset > gameOverScreenTargetOffset) {
@@ -430,7 +517,7 @@ function gameloop() {
                 gameOverFloatOffset = Math.sin(Date.now() * gameOverFloatSpeed) * gameOverFloatAmplitude;
 
                 drawGameOverScreen(); 
-                drawHitboxes(ctx, bird); 
+                drawHitboxes(ctx, deadBird);
                 break;  
         }
     }
@@ -448,5 +535,18 @@ if (jumpSlider) {
         const val = parseFloat(e.target.value);
         window.gameConfig.jumpPower = val; // Update the config
         jumpVal.innerText = val.toFixed(1); // Update the label
+    });
+}
+const gravitySlider = document.getElementById('gravity-slider');
+const gravityVal = document.getElementById('gravity-val');
+
+if (gravitySlider) {
+    gravitySlider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        // Update the global config
+        window.gameConfig.gravity = val; 
+        // Update the UI text
+        if (gravityVal) gravityVal.innerText = val.toFixed(3);
+        console.log("New Gravity:", window.gameConfig.gravity);
     });
 }

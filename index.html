@@ -44,90 +44,125 @@
 
             <!-- Right Side: The Config Panel -->
             <div id="config-panel">
-                <h3>SETTINGS</h3>
                 
-                <div class="control-group">
-                    <label>Game Speed</label>
-                    <input type="range" id="speed-slider" min="1" max="5" step="1" value="1">
-                    <span id="speed-val">1x</span>
-                </div>
-
-                <div class="control-group">
-                    <label>Pipe Gap</label>
-                    <input type="range" id="gap-slider" min="80" max="200" step="10" value="120">
-                    <span id="gap-val">120</span>
-                </div>
-
-                <div class="control-group">
-                    <label>Pipe Frequency</label>
-                    <input type="range" id="freq-slider" min="50" max="300" step="10" value="200">
-                    <span id="freq-val">200</span>
-                </div>
-
-                <!-- Physics Group -->
-                <div class="control-group">
-                    <label>Gravity</label>
-                    <input type="range" id="gravity-slider" min="0.05" max="0.3" step="0.01" value="0.125">
-                    <span id="gravity-val">0.12</span>
-                </div>
-
-                <div class="control-group">
-                    <label>Jump Power</label>
-                    <input type="range" id="jump-slider" min="2" max="6" step="0.2" value="3.8">
-                    <span id="jump-val">3.8</span>
-                </div>
-
-                <!-- Debug Group -->
-                <div class="control-group">
-                    <label style="color: #00ff00;">DEBUG MODE</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="hitbox-toggle">
-                        <span style="font-size: 8px;">Show Hitboxes</span>
-                    </div>
-                </div>
-
-                <!-- AI Stats Group (Only shown in AI mode) -->
-                <div id="ai-stats" style="display: none; border-top: 2px solid #444; padding-top:20px; margin-top: 20px;">
-                    <h3 style="color: #00ff00;">AI TRAINING</h3>
-                    <p style="font-size: 10px;">Gen: <span id="gen-val">1</span></p>
-                    <p style="font-size: 10px;">Alive: <span id="alive-val">0</span>/50</p>
-                    <p style="font-size: 10px;">Best: <span id="best-val">0</span></p>
+                <!-- Block 1: Game Physics -->
+                <div id="physics-section" class="settings-block">
+                    <h2 class="section-header" style="color: #58a6ff;">GAME PHYSICS</h2>
+                    <div class="scrollable-content">
                     
-                    <div class="control-group">
-                        <label>Training Speed</label>
-                        <input type="range" id="ai-speed-slider" min="1" max="10" step="1" value="1">
-                        <span id="ai-speed-val">1x</span>
+                        <div class="control-group">
+                            <label>Speed</label>
+                            <input type="range" id="speed-slider" min="1" max="5" step="1" value="1">
+                            <span id="speed-val">1x</span>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Gap</label>
+                            <input type="range" id="gap-slider" min="80" max="200" step="10" value="120">
+                            <span id="gap-val">120</span>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Gravity</label>
+                            <input type="range" id="gravity-slider" min="0.05" max="0.3" step="0.01" value="0.125">
+                            <span id="gravity-val">0.12</span>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Jump</label>
+                            <input type="range" id="jump-slider" min="2" max="6" step="0.2" value="3.8">
+                            <span id="jump-val">3.8</span>
+                        </div>
                     </div>
                 </div>
 
-                <button class="menu-btn small" onclick="showMenu()">BACK TO MENU</button>
+                <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+
+                <!-- Block 2: AI Evolution -->
+                <div id="ai-section" class="settings-block" style="display: none;">
+                    <h3 class="section-header" style="color: #00ff00;">AI EVOLUTION</h3>
+                    <div class="scrollable-content">
+                    
+                        <div id="ai-stats-display" style="background: rgba(0,255,0,0.1); padding: 15px; border-radius: 5px; margin-bottom: 15px; font-size: 10px; line-height: 1.8;">
+                            <div>Gen: <span id="gen-val">1</span></div>
+                            <div>Alive: <span id="alive-val">0</span>/50</div>
+                            <div>Best: <span id="best-val">0</span></div>
+                        </div>
+                        <!-- Start/Stop Controls -->
+                        <div class="ai-controls">
+                            <button id="ai-start-btn" class="menu-btn small ai">START TRAINING</button>
+                            <button id="ai-stop-btn" class="menu-btn small" style="display:none; background-color: #ff4444;">STOP</button>
+                        </div>
+                        <div class="control-group">
+                            <label>Pop</label>
+                            <input type="range" id="pop-slider" min="10" max="200" step="10" value="50">
+                            <span id="pop-val">50</span>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Mutate</label>
+                            <input type="range" id="mutate-slider" min="0.01" max="0.5" step="0.01" value="0.1">
+                            <span id="mutate-val">0.1</span>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Stag</label>
+                            <input type="range" id="stag-slider" min="5" max="50" step="5" value="15">
+                            <span id="stag-val">15</span>
+                        </div>
+                    </div>
+                </div>    
+                <button class="menu-btn small" onclick="showMenu()" style="width: 100%; margin-top: 20px;">BACK TO MENU</button>
             </div>
+            
         </div>
     </div>
 
     <script>
+        // Store references to the main UI elements
         const mainMenu = document.getElementById('main-menu');
         const gameContainer = document.getElementById('game-container');
 
         function startGame(mode) {
+            if (!window.aiBridge) return;
+
             mainMenu.style.display = 'none';
             gameContainer.style.display = 'block';
-            
-            // Set AI mode in our bridge
-            window.aiBridge.isAiEnabled = (mode === 'ai');
-            
-            // Re-trigger game start if necessary (handled in Game.js)
-            window.dispatchEvent(new CustomEvent('gameStart', { detail: { mode: mode } }));
+
+            // Show/Hide AI section based on mode
+            const aiSection = document.getElementById('ai-section');
+            if (mode === 'ai') {
+                aiSection.style.display = 'flex'; // Uses flex to match heights
+            } else {
+                aiSection.style.display = 'none';
+            }
+
+            requestAnimationFrame(() => {
+                const event = new CustomEvent('gameStart', { detail: { mode: mode } });
+                window.dispatchEvent(event);
+            });
         }
 
         function showMenu() {
-            mainMenu.style.display = 'flex';
-            gameContainer.style.display = 'none';
-            location.reload(); // Simplest way to reset the JS/Python state for now
+            // Simplest way to reset the engine state for now
+            location.reload(); 
         }
+
+        // Brython Initialization logic
+        window.addEventListener('load', () => {
+            if (typeof brython !== 'undefined') {
+                brython();
+                console.log("Brython engine online.");
+            }
+        });
     </script>
 
+    <!-- Load scripts in order -->
     <script type="text/python" src="src/brain.py"></script>
     <script type="module" src="src/Game.js"></script>
+    
+    <!-- Brython Libs (Ensure these are in your <head> or here) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.12.0/brython_stdlib.min.js"></script>
 </body>
 </html>

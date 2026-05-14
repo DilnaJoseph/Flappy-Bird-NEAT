@@ -1,31 +1,45 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 html, body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    width: 100%;
     height: 100%;
+    overflow: hidden;
     /* Set dark background for the area outside the scaled canvas */
     background-color: #383838; 
 }
 
+.split-wrapper {
+    display: flex;
+    flex-direction: row;
+    height: 100vh; /* 100% of the Viewport Height */
+    width: 100vw;
+    background-color: #222;
+}
+
+#canvas-area {
+    flex: 2;
+    position: relative; /* This is the anchor */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #333;
+    height: 100vh;
+    overflow: hidden;
+}
+
 canvas {
     display: block;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Centers the element */
-    
-    /* New Scaling Logic: */
-    
-    /* Maximize width or height while preserving aspect ratio */
-    max-width: 100vw;
-    max-height: 100vh;
-    
-    /* Use 'contain' to ensure the entire fixed canvas fits inside the screen area */
-    object-fit: contain;
-    
-    /* The 'width' and 'height' set here are for the display size */
-    width: 100%;
-    height: 100%;
+    height: 100vh; /* Makes the canvas exactly as tall as the screen */
+    width: auto;   /* Width adjusts automatically to keep the bird from looking fat */
+    aspect-ratio: 325 / 512; 
+    background-color: #000;
+    image-rendering: pixelated; 
 }
 
 #main-menu {
@@ -105,62 +119,224 @@ h1 {
     letter-spacing: 2px;
 }
 
-.split-wrapper {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    width: 100vw;
-    background-color: #222;
-}
-
-#canvas-area {
-    flex: 2; /* Takes up more space */
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #383838;
-}
-
 #config-panel {
-    flex: 1; /* Sidebar width */
-    background-color: #1a1a1a;
+    flex: 1;
+    z-index: 20; /* Higher than the pause overlay */
+    position: relative; 
+    background-color: #222;
     border-left: 4px solid #444;
-    padding: 20px;
-    color: white;
-    font-family: 'Press Start 2P', cursive;
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 20px;
+    height: 100vh;
+    padding: 20px;
 }
 
 #config-panel h3 { font-size: 18px; color: #f7951e; margin-bottom: 10px; }
 
 .control-group {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px; /* Added more vertical breathing room */
 }
 
-.control-group label { font-size: 10px; color: #aaa; }
+.control-group label {
+    font-size: 25px; /* Much larger for readability */
+    font-family: "Press Start 2P";
+    color: #aaa;
+    width: 35%;     /* Give labels enough horizontal space */
+    text-transform: uppercase;
+}
+
+.control-group input[type="range"] {
+    width: 40%;
+}
+
+.control-group span {
+    font-size: 20px; /* Match the label size */
+    font-family: "Press Start 2P";
+    width: 20%;
+    text-align: right;
+    color: #00ff00;
+}
 
 #pause-overlay {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
+    /* This ensures it only covers the canvas area, not the sidebar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.7);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 10;
-    pointer-events: none; /* Let clicks pass through if needed */
+    z-index: 10; /* Sits above the canvas */
+    pointer-events: none; /* Allows you to click the sliders behind it if needed */
 }
 
 #pause-overlay p { font-size: 30px; color: white; margin-bottom: 10px; }
 #pause-overlay span { font-size: 10px; color: #f7951e; }
 
 .menu-btn.small {
-    font-size: 10px;
+    font-size: 14px;
+    font-family: "Press Start 2P";
+    padding: 15px 25px;
+    
+    /* 1. RESET BOX MODEL */
+    display: block;
+    width: fit-content;      /* Makes the button only as wide as its text */
+    
+    /* 2. POSITIONING */
+    margin-top: auto;        /* Pushes the button to the bottom of the panel */
+    margin-bottom: 10px;
+    
+    /* 3. HORIZONTAL ALIGNMENT */
+    /* To move it away from the right, increase the second value (margin-right) */
+    margin-left: auto;       /* Pushes it to the right */
+    margin-right: 20px;      /* This controls the distance from the right edge */
+
+    /* 4. RE-APPLY THEME COLORS */
+    background-color: #54c0c9;
+    border: 4px solid #fff;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #2d828a;
+}
+
+.split-config {
+    display: flex;
+    gap: 15px;
+    height: 400px; /* Fixed height to force scrolling inside */
+    overflow: hidden;
+}
+
+.scrollable-settings {
+    flex: 1;
+    overflow-y: auto; /* This enables the vertical scrollbar */
+    padding-right: 5px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid #333;
+    border-radius: 5px;
+}
+
+.scrollable-content {
+    flex: 1;
+    overflow-y: auto; /* Adds the scrollbar if content is too long */
+    padding-right: 10px;
+}
+
+.scrollable-content::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollable-content::-webkit-scrollbar-thumb {
+    background: #58a6ff;
+    border-radius: 10px;
+}
+
+/* Make scrollbar look cleaner */
+.scrollable-settings::-webkit-scrollbar {
+    width: 5px;
+}
+.scrollable-settings::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background: #222; /* Matches your panel background */
+    margin: 0;
+    padding: 10px 0;
+    z-index: 10;
+    font-size: 12px;
+}
+
+#config-panel {
+    background: #222;
     padding: 15px;
-    margin-top: auto; /* Push to bottom */
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.settings-block {
+    flex: 1; /* This forces both boxes to take equal height if both are shown */
+    min-height: 0; /* Critical for nested scrolling to work in flexbox */
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.section-header {
+    font-size: 40px; /* Slightly bigger than the labels */
+    font-family: "Press Start 2P";
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #333;
+    color: #58a6ff;
+}
+
+.control-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+/* Custom Scrollbar */
+#config-panel::-webkit-scrollbar {
+    width: 6px;
+}
+#config-panel::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+
+/* This container holds the Gen, Alive, and Best lines */
+#ai-stats-display {
+    background: rgba(0, 0, 0, 0.4); /* Darker background to pop against the panel */
+    padding: 15px;
+    border: 2px solid #00ff00;    /* Neon green border for the AI vibe */
+    border-radius: 8px;
+    margin-bottom: 20px;
+    
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;              /* Large enough to read easily */
+    line-height: 2;               /* Adds spacing between the rows */
+    color: #00ff00;               /* Neon green text */
+}
+
+/* Styles the individual rows (Gen: 1, etc.) */
+#ai-stats-display div {
+    display: flex;
+    justify-content: space-between; /* Pushes the label left and value right */
+}
+
+/* Styles the actual numbers (the spans) */
+#ai-stats-display span {
+    color: #ffffff; /* White numbers make them easier to distinguish from labels */
+}
+
+.ai-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Gray out the sliders when training is active */
+input[type="range"]:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+/* Optional: change label color when locked */
+.control-group.locked label {
+    color: #444;
 }
