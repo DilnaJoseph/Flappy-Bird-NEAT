@@ -1,7 +1,8 @@
 """
-Represents a connection between nodes. 
+Represents the genetic representation of an edge/connection in the neural network.
 """
 
+# to create seperate independent copy that wont affect the original one
 from copy import deepcopy
 import random
 
@@ -20,8 +21,10 @@ class ConnectionGene:
     self.enabled = False
 
   def mutate_weight(self,perturb_chance: float = 0.9,perturb_strength: float = 0.5):
+    # small modification in weight 
     if random.random()<perturb_chance:
       self.weight += random.uniform(-perturb_strength,perturb_strength)
+    # complete reset of weight   
     else :
       self.weight = random.uniform(-1, 1)
 
@@ -35,7 +38,6 @@ class ConnectionGene:
   def __eq__(self,other):
     if not isinstance(other,ConnectionGene):
       return False
-
     return self.innovation == other.innovation 
 
   def __hash__(self):
