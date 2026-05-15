@@ -1,3 +1,7 @@
+"""
+helps form species 
+"""
+
 from crossover import crossover
 from mutation import mutate
 from selection import tournament_selection
