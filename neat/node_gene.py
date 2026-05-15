@@ -3,6 +3,7 @@ the node_gene is a neuron in the genome
 only genetic information is stored in this file 
 """
 
+# to create seperate independent copy that wont affect the original one
 from copy import deepcopy
 
 class NodeGene:
@@ -28,11 +29,12 @@ class NodeGene:
     
     def __repr__(self):
       return (f"NodeGene("f"id={self.id},"f"type='{self.type}',"f"layer={self.layer}"f")" )
-      
+
+    # check equality of 2 nodes 
     def __eq__(self,other):
+       # make sure check is with another NodeGene 
       if not isinstance(other,NodeGene):
         return False
-        
       return self.id == other.id
     
     def __hash__(self):
