@@ -1,6 +1,13 @@
+"""
+file handles 3 types of mutation 
+1. weight mutation
+2. add connection mutation
+3. add node mutation 
+"""
+
 import random 
-from node_gene import NodeGene 
-from connection_gene import ConnectionGene
+from node_gene import NodeGene # needed when creating hidden nodes
+from connection_gene import ConnectionGene # needed when creating new nodes 
 
 def mutate_weights(genome):
   for connection in genome.connections.values():
@@ -15,14 +22,15 @@ def add_connection_mutation(genome,innovation_tracker):
     node1 = random.choice(nodes)
     node2 = random.choice(nodes)
 
-    if node1.id ==node2.id:
+    if node1.id ==node2.id: # prevent self connection 
       continue
 
-    if node1.layer >= node2.layer:
+    if node1.layer >= node2.layer: # maintain feed forward network  
       continue
 
-    exists = False 
+    exists = False  
 
+    # to check existing connection
     for connection in genome.connections.values():
       if(connection.in_node == node1.id and connection.out_node == node2.id):
         exists = True 
@@ -33,12 +41,12 @@ def add_connection_mutation(genome,innovation_tracker):
 
     innovation = innovation_tracker.get_innovation(node1.id,node2.id)
 
-    new_connection = ConnectionGene(in_node = node1.id,out_node = node2.id,
-                                    weight = random.uniform(-1,1),innovation = innovation)
+    new_connection = ConnectionGene(in_node = node1.id,out_node = node2.id,weight = random.uniform(-1,1),innovation = innovation)
 
     genome.connections[innovation] = new_connection 
     return 
 
+# A --> B ==> A --> X --> B
 def add_node_mutation(genome,innovation_tracker):
   enabled_connections = [
       connection
@@ -57,12 +65,12 @@ def add_node_mutation(genome,innovation_tracker):
   new_layer = (in_node.layer+out_node.layer)/2
   new_node = NodeGene(node_id = new_node_id,node_type = NodeGene.HIDDEN,layer = new_layer)
   genome.nodes[new_node_id] = new_node
-  
+
+  # creating new connections 
   innovation1 = innovation_tracker.get_innovation(in_node.id,new_node_id)
   connection1 = ConnectionGene(in_node = in_node.id,out_node = new_node_id,weight = 1.0,innovation = innovation1)
   innovation2 = innovation_tracker.get_innovation(new_node.id,out_node.id)
   connection2 = ConnectionGene(in_node = new_node.id,out_node = out_node.id,weight =old_connection.weight,innovation = innovation2)
-  
   genome.connections[innovation1] = connection1
   genome.connections[innovation2] = connection2
 
