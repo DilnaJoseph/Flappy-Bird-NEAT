@@ -1,3 +1,11 @@
+"""
+selection for which genomes get to reproduce
+Methods 
+1. Roulette Selection	    --   Probability based on fitness
+2. Tournament Selection	  --   Best among random subset
+3. Elitism Selection	    --   Preserve top genomes
+"""
+
 import random 
 
 def roulette_selection(species):
